@@ -12,7 +12,7 @@ int main (int argc, const char** argv) {
   uint64_t sum = 0;
 
   time_t t = time(NULL);	// A number that the compiler does not know
-  int incr = t & 255;		// Unknown increment 0..255
+  volatile int incr = t & 255;		// Unknown increment 0..255
 
   int64_t startcy = GetCycles();
   for (int i = 0; i < kIterations; ++i) {
