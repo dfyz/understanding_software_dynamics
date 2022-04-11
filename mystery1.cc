@@ -24,7 +24,7 @@ int main (int argc, const char** argv) {
   fprintf(stdout, "%d iterations, %lu cycles, %4.2f cycles/iteration\n",
           kIterations, elapsed, felapsed / kIterations);
 
-  // fprintf(stdout, "%lu %lu\n", t, sum);	// Make sum live
+  fprintf(stdout, "%lu %lu\n", t, sum);	// Make sum live
 
   return 0;
 }
