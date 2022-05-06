@@ -1,11 +1,14 @@
+(the CPU is AMD Ryzen Threadripper 3970X 32-Core Processor)
+
 2.1 Probably closer to 1.
 
 2.2
 
--O0: 1000000000 iterations, 2758607886 cycles, 2.76 cycles/iteration
--O2: 1000000000 iterations, 37 cycles, 0.00 cycles/iteration
+-O0: 1000000000 iterations, 2640744649 cycles, 2.64 cycles/iteration
+-O2: 1000000000 iterations, 74 cycles, 0.00 cycles/iteration
 
 The -O2 version basicaly optimized the sum away:
+
 0000108f  0f31               rdtsc
 00001091  4889c1             mov     rcx, rax
 00001094  48c1e220           shl     rdx, 0x20
@@ -20,10 +23,10 @@ The -O0 version is also problematic, since it spills the registers to the stack:
 
 2.3
 
--O0: 1000000000 iterations, 2763865327 cycles, 2.76 cycles/iteration
-     1649637847 215000000000
--O2: 1000000000 iterations, 37 cycles, 0.00 cycles/iteration
-     1649637874 242000000000
+-O0: 1000000000 iterations, 2642594797 cycles, 2.64 cycles/iteration
+     1651806633 169000000000
+-O2: 1000000000 iterations, 74 cycles, 0.00 cycles/iteration
+     1651806673 209000000000
 
 The -O2 version still managed to optimize the loop away.
 This time it uses a multiplication by kIterations outside of the loop
@@ -41,9 +44,27 @@ The -O0 version remains the same.
 
 2.4
 
--O0: 1000000000 iterations, 6490183057 cycles, 6.49 cycles/iteration
-     1649637906 18000000000
--O2: 1000000000 iterations, 900758837 cycles, 0.90 cycles/iteration
-     1649637926 38000000000
+-O0: 1000000000 iterations, 6297658075 cycles, 6.30 cycles/iteration
+     1651806729 9000000000
+-O2: 1000000000 iterations, 861000915 cycles, 0.86 cycles/iteration
+     1651806771 51000000000
 
-TODO: explain both differences
+The loop from the -O2 version is now not optimized and consists of
+a memory access, an addition, and a branch. Apparently they all run
+in under one cycle:
+
+000010b0  486344240c         movsxd  rax, dword [rsp+0xc {incr}]
+000010b5  4801c3             add     rbx, rax
+000010b8  83ea01             sub     edx, 0x1
+000010bb  75f3               jne     0x10b0
+
+The slowdown in the -O0 version is absolutely baffling. The only
+change in the generated assembly is the different memory placement
+of `i` and `incr`.
+
+Before: `i` is at `[rbp-0x30], `incr` is at `[rbp-0x2c]`
+Now:    `i` is at `[rbp-0x2c], `incr` is at `[rbp-0x30]`
+
+The whole loop in the -O0 version is 6 instructions (~cycles).
+It seems like the new version actually has reasonable
+performance, while the old version runs unreasonably fast.
