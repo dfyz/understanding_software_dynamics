@@ -1,5 +1,7 @@
 #!/bin/sh
 
+lscpu | grep 'Model name'
+
 as amd_puzzler.s -o tmp.o && \
 ld tmp.o -o amd_puzzler_fast && \
 rm tmp.o
