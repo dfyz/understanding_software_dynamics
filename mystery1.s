@@ -11,11 +11,11 @@
 .set GO_FAST, 1
 
 .ifdef GO_FAST
-.set OFFSET1, 4
-.set OFFSET2, 0
+.set OFFSET1, 12
+.set OFFSET2, 8
 .else
-.set OFFSET1, 0
-.set OFFSET2, 4
+.set OFFSET1, 8
+.set OFFSET2, 12
 .endif
 
 # `r9` is initially set to zero.
