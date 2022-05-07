@@ -39,7 +39,7 @@ The -O0 version is also problematic, since it spills the registers to the stack:
 ```
 
 The -O2 version still managed to optimize the loop away.
-This time it uses a multiplication by kIterations outside of the loop
+This time it uses a multiplication by `kIterations` outside of the loop
 to get the final result:
 
 ```
@@ -79,6 +79,7 @@ change in the generated assembly is the different memory placement
 of `i` and `incr`.
 
 Before: `i` is at `[rbp-0x30]`, `incr` is at `[rbp-0x2c]`
+
 Now:    `i` is at `[rbp-0x2c]`, `incr` is at `[rbp-0x30]`
 
 I distilled this example into a pure assembly program with no dependencies and tried to explain the performance difference [here](/mystery1_24_amd_puzzler/).
