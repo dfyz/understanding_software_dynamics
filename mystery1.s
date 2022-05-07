@@ -11,11 +11,11 @@
 .set .L_GO_FAST, 1 # change to 0 to change modes
 
 .ifne .L_GO_FAST
-.set .L_OFFSET1, 12
+.set .L_OFFSET1, 20
 .set .L_OFFSET2, 8
 .else
 .set .L_OFFSET1, 8
-.set .L_OFFSET2, 12
+.set .L_OFFSET2, 20
 .endif
 
 # `r9` is initially set to zero.
@@ -33,9 +33,9 @@ core_part:
     # Zero out the result
     xor r9, r9
     # Set the increment
-    mov dword ptr [rsp + .L_OFFSET1], 42
+    mov qword ptr [rsp + .L_OFFSET1], 42
     # Zero out the iteration count
-    mov dword ptr [rsp + .L_OFFSET2], 0
+    mov qword ptr [rsp + .L_OFFSET2], 0
 
     # Call rtdsc before the loop
     call get_cycles
@@ -43,15 +43,13 @@ core_part:
 
 main_loop:
     # Load the increment from the stack
-    mov eax, [rsp + .L_OFFSET1]
-    # Sign-extend the increment to a 64-bit value
-    cdqe
+    mov rax, [rsp + .L_OFFSET1]
     # Add the increment to the result
     add r9, rax
     # Increment the iteration count.
-    add dword ptr [rsp + .L_OFFSET2], 1
+    inc qword ptr [rsp + .L_OFFSET2]
     # If we're not done, jump back to the beginning of the main loop.
-    cmp dword ptr [rsp + .L_OFFSET2], 999999999
+    cmp qword ptr [rsp + .L_OFFSET2], 999999999
     jle main_loop
 
     # Call rtdsc after the loop and compute the number of elapsed cycles
