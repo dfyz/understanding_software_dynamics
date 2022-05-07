@@ -1,6 +1,3 @@
-# Run with:
-# as mystery1.s -o mystery1.o && ld mystery1.o -o mystery1 && ./mystery1
-
 .intel_syntax noprefix
 
 .text
