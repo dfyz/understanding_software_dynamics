@@ -5,14 +5,18 @@
 
 # === CORE PART ===
 
+.set .L_SMALL_OFFSET, 8
+.set .L_LARGE_OFFSET, 20
+.set .L_STACK_SIZE, 64
+
 .set .L_GO_FAST, 1 # change to 0 to change modes
 
 .ifne .L_GO_FAST
-.set .L_OFFSET1, 20
-.set .L_OFFSET2, 8
+.set .L_OFFSET1, .L_LARGE_OFFSET
+.set .L_OFFSET2, .L_SMALL_OFFSET
 .else
-.set .L_OFFSET1, 8
-.set .L_OFFSET2, 20
+.set .L_OFFSET1, .L_SMALL_OFFSET
+.set .L_OFFSET2, .L_LARGE_OFFSET
 .endif
 
 # `r9` is initially set to zero.
@@ -24,8 +28,8 @@
 #
 # The number of cycles the main loop took is stored in `r8`.
 core_part:
-    # Reserve 64 bytes (an arbitrary amount) on the stack
-    sub rsp, 64
+    # Reserve the stack space
+    sub rsp, .L_STACK_SIZE
 
     # Zero out the result
     xor r9, r9
@@ -55,7 +59,7 @@ main_loop:
     mov r8, rax
 
     # Restore the stack and exit
-    add rsp, 64
+    add rsp, .L_STACK_SIZE
     ret
 
 # === PLUMBING ===
