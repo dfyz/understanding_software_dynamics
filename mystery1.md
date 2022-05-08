@@ -74,12 +74,4 @@ in under one cycle:
 000010bb  75f3               jne     0x10b0
 ```
 
-The slowdown in the -O0 version is absolutely baffling. The only
-change in the generated assembly is the different memory placement
-of `i` and `incr`.
-
-Before: `i` is at `[rbp-0x30]`, `incr` is at `[rbp-0x2c]`
-
-Now:    `i` is at `[rbp-0x2c]`, `incr` is at `[rbp-0x30]`
-
-I distilled this example into a pure assembly program with no dependencies and tried to explain the performance difference [here](/mystery1_24_amd_puzzler/).
+I tried to explain the performance difference for `-O0` [here](/mystery1_24_amd_puzzler/).
