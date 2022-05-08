@@ -34,8 +34,8 @@ Since my CPU was an `AMD Ryzen 3970X`, I eventually resorted to running [AMD μP
 In desperation, I distilled the full-blown C code into a small, self-contained [assembly program](https://github.com/dfyz/understanding_software_dynamics/blob/master/mystery1_24_amd_puzzler/amd_puzzler.s) and started tinkering randomly, trying to figure out what makes slowdown go away. I observed the following facts, which are not that useful but moderately interesting:
   * The C code stored `i` and `incr` as 32-bit variables, extending them with `cdqe` when appropriate. For simplicity, I switched to 64-bit variables. The problem persisted.
   * The `sum` variable was also spilled to the stack. I moved it to a register, the problem persisted.
-  * Changing `add [...], 1` to `inc [...]` also didn't change anything.
-  * I strated accessing the variables directly with `[rsp + X]` instead of propertly tracking `rbp` and using `[rbp - X]`. The problem persisted.
+  * Converting `add [...], 1` into `inc [...]` also didn't change anything.
+  * I started accessing the variables directly with `[rsp + X]` instead of propertly tracking `rbp` and using `[rbp - X]`. The problem persisted.
 
 At this point, I began playing with stack offsets, and this is where some curious patterns finally started to emerge:
   * The slowdown happens only when then the stack *offset* (i.e., `0x30` in `[rbp-0x30]`) of `i` is **not** divisible by `8`. The absolute value of the offset and the actual address of `i` can be arbitrary.
@@ -83,7 +83,7 @@ cycles = 6722025261
 result = 42000000000
 ```
 
-Based on this, I strongly suspect that the fast version of the program hits the obscure undocumented Zen-2-only feature Anger Fog [found](https://www.agner.org/forum/viewtopic.php?f=1&t=41) a couple of years ago. He [calls](https://www.agner.org/optimize/microarchitecture.pdf) it "Mirroring memory operands" (see section 21.18). Essentially, under some conditions, the CPU allows you to perform successive store/load/RMW instructions operating on the same memory address with zero latency (instead of ). One of these conditions goes like this:
+Based on this, I strongly suspect that the fast version of the program hits the obscure undocumented Zen-2-only feature Anger Fog [found](https://www.agner.org/forum/viewtopic.php?f=1&t=41) a couple of years ago. He [calls](https://www.agner.org/optimize/microarchitecture.pdf) it "Mirroring memory operands" (see section 21.18). Essentially, under some conditions, the CPU allows you to perform successive store/load/RMW instructions operating on the same memory address with zero latency. One of these conditions goes like this:
 
 > The memory address may have an index register, a scale factor, and an offset. The offset must be divisible by 4 in 32 bit mode, and *by 8 in 64 bit mode*.
 
